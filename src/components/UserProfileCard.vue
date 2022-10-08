@@ -2,25 +2,67 @@
   <div class="card mb-3">
     <div class="row no-gutters">
       <div class="col-md-4">
-        <img src="https://i.imgur.com/PEZj4Eu.jpeg" width="300px" height="300px">
+        <img :src="user.image" width="300px" height="300px">
     </div>
       <div class="col-md-8">
         <div class="card-body">
-          <h5 class="card-title">user1</h5>
+          <h5 class="card-title">{{ user.name }}</h5>
           <p class="card-text">
-            user1@example.com
+            {{ user.email }}
           </p>
           <ul class="list-unstyled list-inline">
-            <li><strong>2</strong> 已評論餐廳</li>
-            <li><strong>3</strong> 收藏的餐廳</li>
-            <li><strong>1</strong> followings (追蹤者)</li>
-            <li><strong>0</strong> followers (追隨者)</li>
+            <li><strong>{{ user.commentsLength }}</strong> 已評論餐廳</li>
+            <li><strong>{{ user.favoritedRestaurantsLength }}</strong> 收藏的餐廳</li>
+            <li><strong>{{ user.followingsLength }}</strong> followings (追蹤者)</li>
+            <li><strong>{{ user.followersLength }}</strong> followers (追隨者)</li>
           </ul>
-          <p>
-              <a href="#"><button type="submit" class="btn btn-primary">edit</button></a>
-          </p>
+          <template v-if="isCurrentUser">
+            <router-link :to="{ name: 'user-edit', params: { id: user.id } }" class="btn btn-primary">
+              Edit
+            </router-link>
+          </template>
+          <template v-else>
+            <button v-if="isFollowed" type="button" class="btn btn-danger" @click.stop.prevent="deleteFollowing()">
+              取消追蹤
+            </button>
+            <button v-else type="button" class="btn btn-primary" @click.stop.prevent="addFollowing()">
+              追蹤
+            </button>
+          </template>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script>
+export default {
+  props: {
+    user: {
+      type: Object,
+      required: true
+    },
+    isCurrentUser: {
+      type: Boolean,
+      required: true
+    },
+    initialIsFollowed: {
+      type: Boolean,
+      required: true
+    }
+  },
+  data () {
+    return {
+      isFollowed: this.initialIsFollowed
+    }
+  },
+  methods: {
+    addFollowing() {
+      this.isFollowed = true
+    },
+    deleteFollowing() {
+      this.isFollowed = false
+    }
+  }
+}
+</script>

@@ -1,7 +1,7 @@
 <template>
   <div class="container py-5">
     <!-- UserProfileCard -->
-    <UserProfileCard />
+    <UserProfileCard :user="user" :is-current-user="currentUser.id === user.id" :initial-is-followed="isFollowed"/>
 
     <div class="row">
       <div class="col-md-4">
