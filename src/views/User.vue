@@ -6,17 +6,17 @@
     <div class="row">
       <div class="col-md-4">
         <!-- UserFollowingsCard -->
-        <UserFollowingsCard />
+        <UserFollowingsCard :followings="followings"/>
 
         <!-- UserFollowersCard -->
-        <UserFollowersCard />
+        <UserFollowersCard :followers="followers"/>
       </div>
       <div class="col-md-8">
         <!-- UserCommentsCard -->
-        <UserCommentsCard />
+        <UserCommentsCard :comments="comments"/>
 
         <!-- UserFavoritedRestaurantsCard -->
-        <UserFavoritedRestaurantsCard />
+        <UserFavoritedRestaurantsCard :favorited-restaurants="favoritedRestaurants"/>
       </div>
     </div>
   </div>
