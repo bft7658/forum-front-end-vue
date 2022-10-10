@@ -7,7 +7,7 @@
       </p>
     </div>
     <div class="col-lg-4">
-      <img class="img-responsive center-block" :src="restaurant.image"
+      <img class="img-responsive center-block" :src="restaurant.image | emptyImageFilter"
         style="width: 250px;margin-bottom: 25px;">
       <div class="contact-info-wrap">
         <ul class="list-unstyled">
@@ -50,7 +50,10 @@
 </template>
 
 <script>
+import { emptyImageFilter } from './../utils/mixins'
+
 export default {
+  mixins: [emptyImageFilter],
   props: {
     initialRestaurant: {
       type: Object,

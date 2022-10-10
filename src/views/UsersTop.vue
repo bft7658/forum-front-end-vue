@@ -7,16 +7,16 @@
     <hr>
     <div class="row text-center">
       <div class="col-3" v-for="user in users" :key="user.id">
-        <a href="#">
-          <img :src="user.image ? user.image : 'https://loremflickr.com/320/240/dog'" width="140px" height="140px">
-        </a>
+        <router-link :to="{ name: 'user', params: { id: user.id } }">
+          <img :src="user.image ? user.image : '' | emptyImageFilter" width="140px" height="140px">
+        </router-link>
         <h2>{{user.name}}</h2>
-        <span class="badge badge-secondary">追蹤人數：{{user.FollowerCount}}</span>
+        <span class="badge badge-secondary">追蹤人數：{{user.followerCount}}</span>
         <p class="mt-3">
-          <button v-if="user.isFollowed" @click.stop.prevent="deleteFollowed" type="button" class="btn btn-danger">
+          <button v-if="user.isFollowed" @click.stop.prevent="deleteFollowing(user.id)" type="button" class="btn btn-danger">
             取消追蹤
           </button>
-          <button v-else @click.stop.prevent="addFollowed" type="button" class="btn btn-primary">
+          <button v-else @click.stop.prevent="addFollowing(user.id)" type="button" class="btn btn-primary">
             追蹤
           </button>
         </p>
@@ -27,6 +27,7 @@
 
 <script>
 import NavTabs from './../components/NavTabs'
+import { emptyImageFilter } from './../utils/mixins'
 
 const dummyTopUsers = {
   "users": [
@@ -73,6 +74,7 @@ const dummyTopUsers = {
 }
 
 export default {
+  mixins: [emptyImageFilter],
   components: {
     NavTabs
   },
@@ -82,24 +84,43 @@ export default {
     }
   },
   created () {
-    this.fetchTopUser()
+    this.fetchTopUsers()
   },
   methods: {
-    fetchTopUser() {
-      const { users } = dummyTopUsers
-      this.users = users
+    fetchTopUsers() {
+      this.users = dummyTopUsers.users.map(user => ({
+        id: user.id,
+        name: user.name,
+        image: user.image,
+        followerCount: user.FollowerCount,
+        isFollowed: user.isFollowed
+      }))
     },
-    addFollowed() {
-      this.user = {
-        ...this.user,
-        isFollowed: true
-      }
+    addFollowing(userId) {
+      this.users = this.users.map(user => {
+        if (user.id !== userId) {
+          return user
+        } else {
+          return {
+            ...user,
+            followerCount: user.followerCount + 1,
+            isFollowed: true
+          }
+        }
+      })
     },
-    deleteFollowed() {
-      this.user = {
-        ...this.user,
-        isFollowed: false
-      }
+    deleteFollowing(userId) {
+      this.users = this.users.map(user => {
+        if (user.id !== userId) {
+          return user
+        } else {
+          return {
+            ...user,
+            followerCount: user.followerCount - 1,
+            isFollowed: false
+          }
+        }
+      })
     }
   }
 }
