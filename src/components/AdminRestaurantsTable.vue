@@ -28,9 +28,11 @@
             Show
           </router-link>
 
-          <a href="#" class="btn btn-link">Edit</a>
+          <router-link :to="{name: 'admin-restaurant-edit', params: {id: restaurant.id}}" class="btn btn-link">
+            Edit
+          </router-link>
 
-          <button type="button" class="btn btn-link">
+          <button @click.stop.prevent="deleteRestaurant(restaurant.id)" type="button" class="btn btn-link">
             Delete
           </button>
         </td>
@@ -1007,6 +1009,10 @@ export default {
   methods: {
     fetchRestaurants() {
       this.restaurants = dummyData.restaurants
+    },
+    deleteRestaurant(restaurantId) {
+      console.log(restaurantId)
+      this.restaurants = this.restaurants.filter(restaurant => restaurant.id !== restaurantId)
     }
   }
 }
