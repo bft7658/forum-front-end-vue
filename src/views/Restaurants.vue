@@ -64,7 +64,6 @@ export default {
     async fetchRestaurants({ queryPage, queryCategoryId }) {
       try {
         const response = await restaurantsAPI.getRestaurants({ page: queryPage, categoryId: queryCategoryId })
-        console.log('response', response)
 
         if (response.statusText !== 'OK') {
           throw new Error(response.statusText)
