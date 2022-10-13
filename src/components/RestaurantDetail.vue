@@ -7,7 +7,7 @@
       </p>
     </div>
     <div class="col-lg-4">
-      <img class="img-responsive center-block" :src="restaurant.image | emptyImageFilter"
+      <img class="img-responsive center-block" :src="restaurant.image | emptyImage"
         style="width: 250px;margin-bottom: 25px;">
       <div class="contact-info-wrap">
         <ul class="list-unstyled">

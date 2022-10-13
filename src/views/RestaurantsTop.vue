@@ -10,7 +10,7 @@
       <div class="row no-gutters">
         <div class="col-md-4">
           <router-link :to="{ name: 'restaurant', params: { id: restaurant.id } }">
-            <img class="card-img" :src="restaurant.image | emptyImageFilter">
+            <img class="card-img" :src="restaurant.image | emptyImage">
           </router-link>
         </div>
         <div class="col-md-8">

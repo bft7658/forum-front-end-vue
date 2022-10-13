@@ -8,7 +8,7 @@
     <div class="row text-center">
       <div class="col-3" v-for="user in users" :key="user.id">
         <router-link :to="{ name: 'user', params: { id: user.id } }">
-          <img :src="user.image ? user.image : '' | emptyImageFilter" width="140px" height="140px">
+          <img :src="user.image | emptyImage" width="140px" height="140px">
         </router-link>
         <h2>{{user.name}}</h2>
         <span class="badge badge-secondary">追蹤人數：{{user.followerCount}}</span>
@@ -28,50 +28,8 @@
 <script>
 import NavTabs from './../components/NavTabs'
 import { emptyImageFilter } from './../utils/mixins'
-
-const dummyTopUsers = {
-  "users": [
-    {
-      "id": 1,
-      "name": "root",
-      "email": "root@example.com",
-      "password": "$2a$10$Ez4oG5iECaJqMFkWrkU1Ne9sRTEzisIVSYE3/P07fpyNlpEC83sNy",
-      "isAdmin": true,
-      "image": null,
-      "createdAt": "2022-10-04T13:09:52.000Z",
-      "updatedAt": "2022-10-04T13:09:52.000Z",
-      "Followers": [],
-      "FollowerCount": 0,
-      "isFollowed": false
-    },
-    {
-      "id": 2,
-      "name": "user1",
-      "email": "user1@example.com",
-      "password": "$2a$10$k2KMcDkKZ9S6vCzCXs6uEOZ/lf.Hhd4XjBnAw8aO7CrwlwDdThPy.",
-      "isAdmin": false,
-      "image": null,
-      "createdAt": "2022-10-04T13:09:52.000Z",
-      "updatedAt": "2022-10-04T13:09:52.000Z",
-      "Followers": [],
-      "FollowerCount": 0,
-      "isFollowed": false
-    },
-    {
-      "id": 3,
-      "name": "user2",
-      "email": "user2@example.com",
-      "password": "$2a$10$SKf4G1ILWN.vpjeTKcffMOoop4ZURC1QDkifhAOsYOYSN2XANdh6i",
-      "isAdmin": false,
-      "image": null,
-      "createdAt": "2022-10-04T13:09:52.000Z",
-      "updatedAt": "2022-10-04T13:09:52.000Z",
-      "Followers": [],
-      "FollowerCount": 0,
-      "isFollowed": false
-    }
-  ]
-}
+import usersAPI from './../apis/users'
+import { Toast } from './../utils/helpers'
 
 export default {
   mixins: [emptyImageFilter],
@@ -87,40 +45,74 @@ export default {
     this.fetchTopUsers()
   },
   methods: {
-    fetchTopUsers() {
-      this.users = dummyTopUsers.users.map(user => ({
-        id: user.id,
-        name: user.name,
-        image: user.image,
-        followerCount: user.FollowerCount,
-        isFollowed: user.isFollowed
-      }))
+    async fetchTopUsers() {
+      try {
+        const { data } = await usersAPI.getTopUsers()
+
+        this.users = data.users.map(user => ({
+          id: user.id,
+          name: user.name,
+          image: user.image,
+          followerCount: user.FollowerCount,
+          isFollowed: user.isFollowed
+        }))
+      } catch (error) {
+        console.log(error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法取得美食達人，請稍後再試'
+        })
+      }
     },
-    addFollowing(userId) {
-      this.users = this.users.map(user => {
-        if (user.id !== userId) {
-          return user
-        } else {
-          return {
-            ...user,
-            followerCount: user.followerCount + 1,
-            isFollowed: true
-          }
+    async addFollowing(userId) {
+      try {
+        const { data } = await usersAPI.addFollowing({ userId })
+        if (data.status === 'error') {
+          throw new Error(data.message)
         }
-      })
+
+        this.users = this.users.map(user => {
+          if (user.id !== userId) {
+            return user
+          } else {
+            return {
+              ...user,
+              followerCount: user.followerCount + 1,
+              isFollowed: true
+            }
+          }
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法加入追蹤，請稍後再試'
+        })
+      }
     },
-    deleteFollowing(userId) {
-      this.users = this.users.map(user => {
-        if (user.id !== userId) {
-          return user
-        } else {
-          return {
-            ...user,
-            followerCount: user.followerCount - 1,
-            isFollowed: false
-          }
+    async deleteFollowing(userId) {
+      try {
+        const { data } = await usersAPI.deleteFollowing({ userId })
+        if (data.status === 'error') {
+          throw new Error(data.message)
         }
-      })
+
+        this.users = this.users.map(user => {
+          if (user.id !== userId) {
+            return user
+          } else {
+            return {
+              ...user,
+              followerCount: user.followerCount - 1,
+              isFollowed: false
+            }
+          }
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法移除追蹤，請稍後再試'
+        })
+      }
     }
   }
 }
