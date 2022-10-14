@@ -8,7 +8,7 @@
           <input type="text" v-model="newCategoryName" class="form-control" placeholder="新增餐廳類別...">
         </div>
         <div class="col-auto">
-          <button type="button" class="btn btn-primary" @click.stop.prevent="createCategory">
+          <button type="button" class="btn btn-primary" @click.stop.prevent="createCategory" :disabled="isProcessing">
             新增
           </button>
         </div>
@@ -60,7 +60,6 @@
 </template>
 
 <script>
-import { v4 as uuidv4 } from 'uuid'
 import AdminNav from './../components/AdminNav.vue'
 import adminAPI from './../apis/admin'
 import { Toast } from './../utils/helpers'
@@ -72,7 +71,8 @@ export default {
   data() {
     return {
       categories: [],
-      newCategoryName: ''
+      newCategoryName: '',
+      isProcessing: false
     }
   },
   created() {
@@ -98,13 +98,33 @@ export default {
         })
       }
     },
-    createCategory() {
-      this.categories.push({
-        id: uuidv4(),
-        name: this.newCategoryName
-      })
+    async createCategory() {
+      try {
+        this.isProcessing = true
+        const { data } = await adminAPI.categories.create({ name: this.newCategoryName })
+        if (data.status === 'error') {
+          throw new Error(data.message)
+        }
+        
+        this.categories.push({
+          id: data.categoryId,
+          name: this.newCategoryName,
+          isEditing: false
+        })
 
-      this.newCategoryName = ''
+        this.isProcessing = false
+        this.newCategoryName = ''
+        Toast.fire({
+          icon: 'success',
+          title: data.message
+        })
+      } catch (error) {
+        this.isProcessing = false
+        Toast.fire({
+          icon: 'error',
+          title: '無法新增餐廳類別，請稍後再試'
+        })
+      }
     },
     deleteCategory(categoryId) {
       this.categories = this.categories.filter(category => category.id !== categoryId)
