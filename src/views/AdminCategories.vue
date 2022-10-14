@@ -46,7 +46,7 @@
             <button v-show="!category.isEditing" @click.stop.prevent="toggleIsEditing(category.id)" type="button" class="btn btn-link mr-2">
               Edit
             </button>
-            <button v-show="category.isEditing" @click.stop.prevent="updateCategory({ categoryId: category.id, name: category.name })" type="button" class="btn btn-link mr-2">
+            <button v-show="category.isEditing" @click.stop.prevent="updateCategory({ categoryId: category.id, name: category.name })" :disabled="isProcessing" type="button" class="btn btn-link mr-2">
               Save
             </button>
             <button type="button" class="btn btn-link mr-2" @click.stop.prevent="deleteCategory(category.id)">
@@ -63,6 +63,7 @@
 import AdminNav from './../components/AdminNav.vue'
 import adminAPI from './../apis/admin'
 import { Toast } from './../utils/helpers'
+import Swal from 'sweetalert2'
 
 export default {
   components: {
@@ -85,7 +86,8 @@ export default {
         if (data.status === 'error') {
           throw new Error(data.message)
         }
-
+        
+        // 將 API 傳來的資料放進 vue 裡
         this.categories = data.categories.map(category => ({
           ...category,
           isEditing: false,
@@ -126,12 +128,58 @@ export default {
         })
       }
     },
-    deleteCategory(categoryId) {
-      this.categories = this.categories.filter(category => category.id !== categoryId)
+    async deleteCategory(categoryId) {
+      try {
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, delete it!'
+        })
+        if (result.value) {
+          const { data } = await adminAPI.categories.delete({ categoryId })
+          if (data.status === 'error') {
+            throw new Error(data.message)
+          }
+          this.categories = this.categories.filter(category => category.id !== categoryId)
+          
+          Swal.fire(
+            'Deleted!',
+            '成功刪除該餐廳類別',
+            'success'
+          )
+        }
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法刪除該餐廳類別，請稍後再試'
+        })
+      }
     },
-    /* eslint-disable */
-    updateCategory({ categoryId, name }) {
-      this.toggleIsEditing(categoryId)
+    async updateCategory({ categoryId, name }) {
+      try {
+        this.isProcessing = true
+        const { data } = await adminAPI.categories.update({ categoryId, name })
+        if (data.status === 'error') {
+          throw new Error(data.message)
+        }
+
+        this.isProcessing = false
+        this.toggleIsEditing(categoryId)
+        Toast.fire({
+          icon: 'success',
+          title: data.message
+        })
+      } catch (error) {
+        this.isProcessing = false
+        Toast.fire({
+          icon: 'error',
+          title: '無法更新餐廳類別，請稍後再試'
+        })
+      }
     },
     toggleIsEditing(categoryId) {
       this.categories = this.categories.map(category => {
@@ -142,7 +190,6 @@ export default {
             nameCached: category.name
           }
         }
-
         return category
       })
     },

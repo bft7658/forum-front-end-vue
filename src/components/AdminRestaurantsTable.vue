@@ -44,6 +44,7 @@
 <script>
 import adminAPI from './../apis/admin'
 import { Toast } from './../utils/helpers'
+import Swal from 'sweetalert2'
 
 export default {
   data() {
@@ -71,24 +72,57 @@ export default {
       }
     },
     async deleteRestaurant(restaurantId) {
-      try {
-        const { data } = await adminAPI.restaurants.delete({ restaurantId })
-        if (data.status === 'error') {
-          throw new Error(data.message)
-        }
 
-        this.restaurants = this.restaurants.filter(restaurant => restaurant.id !== restaurantId)
-        
-        Toast.fire({
-          icon: 'success',
-          title: '刪除餐廳成功'
+      try {
+        const result = await Swal.fire({
+          title: 'Are you sure?',
+          text: "You won't be able to revert this!",
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, delete it!'
         })
+        if (result.value) {
+          const { data } = await adminAPI.restaurants.delete({ restaurantId })
+          if (data.status === 'error') {
+            throw new Error(data.message)
+          }
+
+          this.restaurants = this.restaurants.filter(restaurant => restaurant.id !== restaurantId)
+          Swal.fire(
+            'Deleted!',
+            '成功刪除該餐廳',
+            'success'
+          )
+        }
       } catch (error) {
         Toast.fire({
           icon: 'error',
           title: '無法刪除餐廳，請稍後再試'
         })
       }
+
+
+
+      // try {
+      //   const { data } = await adminAPI.restaurants.delete({ restaurantId })
+      //   if (data.status === 'error') {
+      //     throw new Error(data.message)
+      //   }
+
+      //   this.restaurants = this.restaurants.filter(restaurant => restaurant.id !== restaurantId)
+        
+      //   Toast.fire({
+      //     icon: 'success',
+      //     title: '刪除餐廳成功'
+      //   })
+      // } catch (error) {
+      //   Toast.fire({
+      //     icon: 'error',
+      //     title: '無法刪除餐廳，請稍後再試'
+      //   })
+      // }
     }
   }
 }
