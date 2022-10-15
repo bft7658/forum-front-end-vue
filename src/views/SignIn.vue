@@ -9,14 +9,14 @@
 
       <div class="form-label-group mb-2">
         <label for="email">email</label>
-        <input id="email" v-model="email" name="email" type="email" class="form-control" placeholder="email" autocomplete="username"
-        required autofocus>
+        <input id="email" v-model="email" name="email" type="email" class="form-control" placeholder="email"
+          autocomplete="username" required autofocus>
       </div>
 
       <div class="form-label-group mb-3">
         <label for="password">Password</label>
-        <input id="password" v-model="password" name="password" type="password" class="form-control" placeholder="Password"
-          autocomplete="current-password" required>
+        <input id="password" v-model="password" name="password" type="password" class="form-control"
+          placeholder="Password" autocomplete="current-password" required>
       </div>
 
       <button :disabled="isProcessing" class="btn btn-lg btn-primary btn-block mb-3" type="submit">
@@ -43,7 +43,7 @@ import authorizationAPI from './../apis/authorization'
 import { Toast } from './../utils/helpers'
 
 export default {
-  data () {
+  data() {
     return {
       email: '',
       password: '',
@@ -64,21 +64,21 @@ export default {
         }
 
         this.isProcessing = true
-
         const response = await authorizationAPI.signIn({
           email: this.email,
           password: this.password
         })
-          const { data } = response
-
-          if (data.status === 'error') {
-            throw new Error(data.message)
-          }
-          // 將 token 存放在 localStorage 內
-          localStorage.setItem('token', data.token)
-          // 成功登入後轉址到餐廳首頁
-          this.$router.push('/restaurants')
-      } catch(error) {
+        const { data } = response
+        if (data.status === 'error') {
+          throw new Error(data.message)
+        }
+        // 將 token 存放在 localStorage 內
+        localStorage.setItem('token', data.token)
+        // 透過 setCurrentUser 把使用者資料存到 Vuex 的 state 中
+        this.$store.commit('setCurrentUser', data.user)
+        // 成功登入後轉址到餐廳首頁
+        this.$router.push('/restaurants')
+      } catch (error) {
         // 將密碼欄位清空
         this.password = ''
         // 將 button 改回可按的狀態
