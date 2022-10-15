@@ -6,7 +6,7 @@
     </div>
     <div class="d-flex align-items-center justify-content-between">
       <button type="button" class="btn btn-link" @click="$router.back()">回上一頁</button>
-      <button type="submit" class="btn btn-primary mr-0">
+      <button type="submit" class="btn btn-primary mr-0" :disabled="isProcessing">
         Submit
       </button>
     </div>
@@ -14,7 +14,8 @@
 </template>
 
 <script>
-import { v4 as uuidv4 } from "uuid"
+import commentsAPI from './../apis/comments'
+import { Toast } from './../utils/helpers'
 
 export default {
   props: {
@@ -25,19 +26,47 @@ export default {
   },
   data() {
     return {
-      text: ''
+      text: '',
+      isProcessing: false
     }
   },
   methods: {
-    handleSubmit() {
-      // TODO: 向 API 發送 POST 請求
-      // 伺服器新增 Comment 成功後...
-      this.$emit('after-create-comment', {
-        commentId: uuidv4(), // 尚未串接 API 暫時使用隨機的 id
-        restaurantId: this.restaurantId,
-        text: this.text
-      })
-      this.text = '' // 將表單內的資料清空
+    async handleSubmit() {
+      try {
+        if (!this.text) {
+          Toast.fire({
+            icon: 'warning',
+            title: '您尚未填寫任何評論'
+          })
+          return
+        }
+        // 向 API 發送 POST 請求
+        // 非同步地方設計 isProcessing 變數，為了不讓使用者可以重複送出
+        this.isProcessing = true
+        const { data } = await commentsAPI.create({
+          restaurantId: this.restaurantId,
+          text: this.text
+        })
+        if (data.status === 'error') {
+          throw new Error(data.message)
+        }
+
+        // 伺服器新增 Comment 成功後，將資料放回 vue 裡使用
+        this.$emit('after-create-comment', {
+          commentId: data.commentId,
+          restaurantId: this.restaurantId,
+          text: this.text
+        })
+        this.text = '' // 將表單內的資料清空
+        this.isProcessing = false
+      } catch (error) {
+        console.error(error.message)
+        this.isProcessing = false
+        Toast.fire({
+          icon: 'error',
+          title: '無法新增評論，請稍後再試'
+        })
+      }
     }
   }
 }
