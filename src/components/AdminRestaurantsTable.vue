@@ -102,27 +102,6 @@ export default {
           title: '無法刪除餐廳，請稍後再試'
         })
       }
-
-
-
-      // try {
-      //   const { data } = await adminAPI.restaurants.delete({ restaurantId })
-      //   if (data.status === 'error') {
-      //     throw new Error(data.message)
-      //   }
-
-      //   this.restaurants = this.restaurants.filter(restaurant => restaurant.id !== restaurantId)
-        
-      //   Toast.fire({
-      //     icon: 'success',
-      //     title: '刪除餐廳成功'
-      //   })
-      // } catch (error) {
-      //   Toast.fire({
-      //     icon: 'error',
-      //     title: '無法刪除餐廳，請稍後再試'
-      //   })
-      // }
     }
   }
 }
