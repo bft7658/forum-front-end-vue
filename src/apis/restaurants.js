@@ -1,5 +1,4 @@
 import { apiHelper } from './../utils/helpers'
-const getToken = () => localStorage.getItem('token')
 
 export default {
   // 向 API 發出請求
@@ -7,23 +6,15 @@ export default {
     // 攜帶 categoryId, page 參數
     const searchParams = new URLSearchParams({ page, categoryId })
     // HTTP Header 攜帶 token
-    return apiHelper.get(`/restaurants?${searchParams.toString()}`, {
-      headers: { Authorization: `Bearer ${getToken()}`}
-    })
+    return apiHelper.get(`/restaurants?${searchParams.toString()}`)
   },
   getRestaurant({ restaurantId }) {
-    return apiHelper.get(`/restaurants/${restaurantId}`, {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
+    return apiHelper.get(`/restaurants/${restaurantId}`)
   },
   getFeeds () {
-    return apiHelper.get('/restaurants/feeds', {
-      headers: { Authorization: `Bearer ${getToken()}` }
-    })
+    return apiHelper.get('/restaurants/feeds')
   },
   getTopRestaurants () {
-    return apiHelper.get('/restaurants/top', {
-      headers: { Authorization: `Bearer ${getToken()}`}
-    })
+    return apiHelper.get('/restaurants/top')
   }
 }

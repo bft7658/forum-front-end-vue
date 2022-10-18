@@ -12,7 +12,7 @@
         </router-link>
         <h2>{{user.name}}</h2>
         <span class="badge badge-secondary">追蹤人數：{{user.followerCount}}</span>
-        <p class="mt-3">
+        <p class="mt-3" v-if="currentUser.id !== user.id">
           <button v-if="user.isFollowed" @click.stop.prevent="deleteFollowing(user.id)" type="button" class="btn btn-danger">
             取消追蹤
           </button>
@@ -30,6 +30,7 @@ import NavTabs from './../components/NavTabs'
 import { emptyImageFilter } from './../utils/mixins'
 import usersAPI from './../apis/users'
 import { Toast } from './../utils/helpers'
+import { mapState } from 'vuex'
 
 export default {
   mixins: [emptyImageFilter],
@@ -40,6 +41,9 @@ export default {
     return {
       users: []
     }
+  },
+  computed: {
+    ...mapState(['currentUser'])
   },
   created () {
     this.fetchTopUsers()
