@@ -15,10 +15,10 @@
           <h2>{{user.name}}</h2>
           <span class="badge badge-secondary">追蹤人數：{{user.followerCount}}</span>
           <p class="mt-3" v-if="currentUser.id !== user.id">
-            <button v-if="user.isFollowed" @click.stop.prevent="deleteFollowing(user.id)" type="button" class="btn btn-danger">
+            <button v-if="user.isFollowed" @click.stop.prevent="deleteFollowing(user.id)" :disabled="isProcessing" type="button" class="btn btn-danger">
               取消追蹤
             </button>
-            <button v-else @click.stop.prevent="addFollowing(user.id)" type="button" class="btn btn-primary">
+            <button v-else @click.stop.prevent="addFollowing(user.id)" :disabled="isProcessing" type="button" class="btn btn-primary">
               追蹤
             </button>
           </p>
@@ -45,7 +45,8 @@ export default {
   data () {
     return {
       users: [],
-      isLoading: true
+      isLoading: true,
+      isProcessing: false
     }
   },
   computed: {
@@ -82,6 +83,7 @@ export default {
     },
     async addFollowing(userId) {
       try {
+        this.isProcessing = true
         const { data } = await usersAPI.addFollowing({ userId })
         if (data.status === 'error') {
           throw new Error(data.message)
@@ -98,7 +100,9 @@ export default {
             }
           }
         })
+        this.isProcessing = false
       } catch (error) {
+        this.isProcessing = false
         Toast.fire({
           icon: 'error',
           title: '無法加入追蹤，請稍後再試'
@@ -107,6 +111,7 @@ export default {
     },
     async deleteFollowing(userId) {
       try {
+        this.isProcessing = true
         const { data } = await usersAPI.deleteFollowing({ userId })
         if (data.status === 'error') {
           throw new Error(data.message)
@@ -123,7 +128,9 @@ export default {
             }
           }
         })
+        this.isProcessing = false
       } catch (error) {
+        this.isProcessing = false
         Toast.fire({
           icon: 'error',
           title: '無法移除追蹤，請稍後再試'

@@ -28,11 +28,11 @@
                 Show
               </router-link>
 
-              <button v-if="restaurant.isFavorited" type="button" class="btn btn-danger mr-2"
+              <button v-if="restaurant.isFavorited" :disabled="isProcessing" type="button" class="btn btn-danger mr-2"
                 @click.stop.prevent="deleteFavorite(restaurant.id)">
                 移除最愛
               </button>
-              <button v-else type="button" class="btn btn-primary" @click.stop.prevent="addFavorite(restaurant.id)">
+              <button v-else type="button" class="btn btn-primary" @click.stop.prevent="addFavorite(restaurant.id)" :disabled="isProcessing">
                 加到最愛
               </button>
 
@@ -61,7 +61,8 @@ export default {
   data () {
     return {
       restaurants: [],
-      isLoading: true
+      isLoading: true,
+      isProcessing: false
     }
   },
   created () {
@@ -88,6 +89,7 @@ export default {
     },
     async addFavorite(restaurantId) {
       try {
+        this.isProcessing = true
         const { data } = await usersAPI.addFavorite({ restaurantId })
         if (data.status !== 'success') {
           throw new Error(data.message)
@@ -105,7 +107,9 @@ export default {
             }
           })
           .sort((a, b) => b.FavoriteCount - a.FavoriteCount)
+        this.isProcessing = false
       } catch (error) {
+        this.isProcessing = false
         Toast.fire({
           icon: 'error',
           title: '無法將餐廳加入最愛，請稍後再試'
@@ -114,6 +118,7 @@ export default {
     },
     async deleteFavorite(restaurantId) {
       try {
+        this.isProcessing = true
         const { data } = await usersAPI.deleteFavorite({ restaurantId })
         if (data.status !== 'success') {
           throw new Error(data.message)
@@ -131,7 +136,9 @@ export default {
             }
           })
           .sort((a, b) => b.FavoriteCount - a.FavoriteCount)
+        this.isProcessing = false  
       } catch (error) {
+        this.isProcessing = false
         Toast.fire({
           icon: 'error',
           title: '無法將餐廳移除最愛，請稍後再試'
