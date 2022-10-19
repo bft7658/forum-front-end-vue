@@ -1,34 +1,38 @@
 <template>
   <div class="container py-5">
-    <!-- UserProfileCard -->
-    <UserProfileCard :user="user" :is-current-user="currentUser.id === user.id" :initial-is-followed="isFollowed"/>
+    <Spinner v-if="isLoading" />
+    <template v-else>
+      <!-- UserProfileCard -->
+      <UserProfileCard :user="user" :is-current-user="currentUser.id === user.id" :initial-is-followed="isFollowed"/>
 
-    <div class="row">
-      <div class="col-md-4">
-        <!-- UserFollowingsCard -->
-        <UserFollowingsCard :followings="followings"/>
+      <div class="row">
+        <div class="col-md-4">
+          <!-- UserFollowingsCard -->
+          <UserFollowingsCard :followings="followings"/>
 
-        <!-- UserFollowersCard -->
-        <UserFollowersCard :followers="followers"/>
+          <!-- UserFollowersCard -->
+          <UserFollowersCard :followers="followers"/>
+        </div>
+        <div class="col-md-8">
+          <!-- UserCommentsCard -->
+          <UserCommentsCard :comments="comments"/>
+
+          <!-- UserFavoritedRestaurantsCard -->
+          <UserFavoritedRestaurantsCard :favorited-restaurants="favoritedRestaurants"/>
+        </div>
       </div>
-      <div class="col-md-8">
-        <!-- UserCommentsCard -->
-        <UserCommentsCard :comments="comments"/>
-
-        <!-- UserFavoritedRestaurantsCard -->
-        <UserFavoritedRestaurantsCard :favorited-restaurants="favoritedRestaurants"/>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
-import UserProfileCard from './../components/UserProfileCard.vue'
-import UserFollowingsCard from './../components/UserFollowingsCard.vue'
-import UserFollowersCard from './../components/UserFollowersCard.vue'
-import UserCommentsCard from './../components/UserCommentsCard.vue'
-import UserFavoritedRestaurantsCard from './../components/UserFavoritedRestaurantsCard.vue'
+import UserProfileCard from './../components/UserProfileCard'
+import UserFollowingsCard from './../components/UserFollowingsCard'
+import UserFollowersCard from './../components/UserFollowersCard'
+import UserCommentsCard from './../components/UserCommentsCard'
+import UserFavoritedRestaurantsCard from './../components/UserFavoritedRestaurantsCard'
+import Spinner from './../components/Spinner'
 import usersAPI from './../apis/users'
 import { Toast } from './../utils/helpers' 
 
@@ -38,7 +42,8 @@ export default {
     UserFollowingsCard,
     UserFollowersCard,
     UserCommentsCard,
-    UserFavoritedRestaurantsCard
+    UserFavoritedRestaurantsCard,
+    Spinner
   },
   data () {
     return {
@@ -56,7 +61,8 @@ export default {
       followings: [],
       followers: [],
       comments: [],
-      favoritedRestaurants: []
+      favoritedRestaurants: [],
+      isLoading: true
     }
   },
   // 從 Vuex 中將登入者的資料取出
@@ -76,6 +82,7 @@ export default {
   methods: {
     async fetchUser(userId) {
       try {
+        this.isLoading = true
         const { data } = await usersAPI.get({ userId })
         if (data.status === 'error') {
           throw new Error(data.message)
@@ -111,8 +118,10 @@ export default {
         // 將重複留言的餐廳進行篩選，使其合併代表同一間餐廳
         const commentSet = new Set()
         this.comments = Comments.filter(comment => !commentSet.has(comment.RestaurantId) ? commentSet.add(comment.RestaurantId) : false)
+        this.isLoading = false
       } catch (error) {
         console.error(error.message)
+        this.isLoading = false
         Toast.fire({
           icon: 'error',
           title: '無法取得使用者資料，請稍後再試'

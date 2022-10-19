@@ -14,7 +14,8 @@
         </div>
       </div>
     </form>
-    <table class="table">
+    <Spinner v-if="isLoading" />
+    <table v-else class="table">
       <thead class="thead-dark">
         <tr>
           <th scope="col" width="60">
@@ -61,19 +62,22 @@
 
 <script>
 import AdminNav from './../components/AdminNav.vue'
+import Spinner from './../components/Spinner'
 import adminAPI from './../apis/admin'
 import { Toast } from './../utils/helpers'
 import Swal from 'sweetalert2'
 
 export default {
   components: {
-    AdminNav
+    AdminNav,
+    Spinner
   },
   data() {
     return {
       categories: [],
       newCategoryName: '',
-      isProcessing: false
+      isProcessing: false,
+      isLoading: true
     }
   },
   created() {
@@ -82,6 +86,7 @@ export default {
   methods: {
     async fetchCategories() {
       try {
+        this.isLoading = true
         const { data } = await adminAPI.categories.get()
         if (data.status === 'error') {
           throw new Error(data.message)
@@ -93,7 +98,9 @@ export default {
           isEditing: false,
           nameCached: ''
         }))
+        this.isLoading = false
       } catch (error) {
+        this.isLoading = false
         Toast.fire({
           icon: 'error',
           title: '無法取得餐廳類別，請稍後再試'

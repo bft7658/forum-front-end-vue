@@ -1,12 +1,12 @@
 <template>
   <div class="col-md-6 col-lg-4">
     <div class="card mb-4">
-      <router-link :to="{ name: 'restaurant', params: { id: restaurant.id }}">
+      <router-link :to="{ name: 'restaurant', params: { id: restaurant.id } }">
         <img class="card-img-top" :src="restaurant.image | emptyImage" alt="Card image cap" width="286px" height="180px">
       </router-link>
       <div class="card-body">
         <p class="card-text title-wrap">
-          <router-link :to="{ name: 'restaurant', params: { id: restaurant.id }}">
+          <router-link :to="{ name: 'restaurant', params: { id: restaurant.id } }">
             {{ restaurant.name }}
           </router-link>
         </p>

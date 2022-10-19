@@ -3,7 +3,8 @@
     <!-- AdminNav Component -->
     <AdminNav />
 
-    <table class="table">
+    <Spinner v-if="isLoading" />
+    <table v-else class="table">
       <thead class="thead-dark">
         <tr>
           <th scope="col">
@@ -35,6 +36,7 @@
               type="button"
               class="btn btn-link"
               v-if="currentUser.id !== user.id"
+              :disabled="isProcessing"
               @click.stop.prevent="toggleUserRole({ userId: user.id, isAdmin: user.isAdmin })"
             >
               {{ user.isAdmin ? 'set as user' : 'set as admin' }}
@@ -49,16 +51,20 @@
 <script>
 import { mapState } from 'vuex'
 import AdminNav from './../components/AdminNav'
+import Spinner from './../components/Spinner'
 import adminAPI from './../apis/admin'
 import { Toast } from './../utils/helpers'
 
 export default {
   components: {
-    AdminNav
+    AdminNav,
+    Spinner
   },
   data() {
     return {
-      users: []
+      users: [],
+      isProcessing: false,
+      isLoading: true
     }
   },
   computed: {
@@ -70,14 +76,17 @@ export default {
   methods: {
     async fetchUsers() {
       try {
+        this.isLoading = true
         const { data } = await adminAPI.users.get()
         if (data.status === 'error') {
           throw new Error(data.message)
         }
 
         this.users = data.users
+        this.isLoading = false
       } catch (error) {
         console.error(error.message)
+        this.isLoading = false
         Toast.fire({
           icon: 'error',
           title: '無法取得會員資料，請稍後再試'
@@ -86,6 +95,7 @@ export default {
     },
     async toggleUserRole({ userId, isAdmin }) {
       try {
+        this.isProcessing = true
         const { data } =await adminAPI.users.update({
           userId,
           isAdmin: (!isAdmin).toString()
@@ -103,7 +113,9 @@ export default {
           }
           return user
         })
+        this.isProcessing = false
       } catch (error) {
+        this.isProcessing = false
         console.error(error.message)
         Toast.fire({
           icon: 'error',

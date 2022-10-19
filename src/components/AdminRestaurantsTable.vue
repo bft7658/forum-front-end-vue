@@ -1,5 +1,6 @@
 <template>
-  <table class="table">
+  <Spinner v-if="isLoading" />
+  <table v-else class="table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">
@@ -24,11 +25,11 @@
         <td>{{ restaurant.Category ? restaurant.Category.name : '未分類' }}</td>
         <td>{{ restaurant.name }}</td>
         <td class="d-flex justify-content-between">
-          <router-link :to="{name: 'admin-restaurant', params: {id: restaurant.id}}" class="btn btn-link">
+          <router-link :to="{name: 'admin-restaurant', params: {id: restaurant.id} }" class="btn btn-link">
             Show
           </router-link>
 
-          <router-link :to="{name: 'admin-restaurant-edit', params: {id: restaurant.id}}" class="btn btn-link">
+          <router-link :to="{name: 'admin-restaurant-edit', params: {id: restaurant.id} }" class="btn btn-link">
             Edit
           </router-link>
 
@@ -42,14 +43,19 @@
 </template>
 
 <script>
+import Spinner from './../components/Spinner'
 import adminAPI from './../apis/admin'
 import { Toast } from './../utils/helpers'
 import Swal from 'sweetalert2'
 
 export default {
+  components: {
+    Spinner
+  },
   data() {
     return {
-      restaurants: []
+      restaurants: [],
+      isLoading: true
     }
   },
   created() {
@@ -58,13 +64,16 @@ export default {
   methods: {
     async fetchRestaurants() {
       try {
+        this.isLoading = true
         const { data } = await adminAPI.restaurants.get()
         if (data.status === 'error') {
           throw new Error(data.message)
         }
 
         this.restaurants = data.restaurants
+        this.isLoading = false
       } catch (error) {
+        this.isLoading = false
         Toast.fire({
           icon: 'error',
           title: '無法取得餐廳，請稍後再試'
